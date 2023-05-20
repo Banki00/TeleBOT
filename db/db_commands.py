@@ -1,7 +1,6 @@
 from sqlalchemy import extract, func
 from sqlalchemy.exc import IntegrityError
-from datetime import date, timedelta
-
+from datetime import date, timedelta, datetime
 from db.db_connect import session
 from services import RawService, AddService
 
@@ -61,23 +60,23 @@ def add_raw_service(data: dict):
 
 
 def get_services_for_day(day: str, id_employee: int):
-    def result(set_day):
-        res = session.query(
-            AddService.id,
-            RawService.service_name,
-            AddService.sum_for_employee,
-            AddService.discount,
-            AddService.date_add
-        ).filter(
-            RawService.id == AddService.service,
-            AddService.date_add == set_day,
-            AddService.id_employee == id_employee
-        )
-        return res
     if day == 'Сегодня':
-        return result(date.today())
+        set_day = datetime.now().date()
     elif day == 'Вчера':
-        return result(date.today() - timedelta(days=1))
+        set_day = (datetime.now() - timedelta(days=1)).date()
+    else:
+        set_day = datetime.strptime(day, '%Y-%m-%d').date()
+    res = session.query(
+        AddService.id,
+        RawService.service_name,
+        AddService.sum_for_employee,
+        AddService.discount,
+        AddService.date_add
+    ).join(RawService, RawService.id == AddService.service).filter(
+        AddService.date_add == set_day,
+        AddService.id_employee == id_employee
+    )
+    return res
 
 
 def get_services_for_month(num_month: int, id_employee: int):
@@ -87,8 +86,7 @@ def get_services_for_month(num_month: int, id_employee: int):
         AddService.sum_for_employee,
         AddService.discount,
         AddService.date_add
-    ).filter(
-        RawService.id == AddService.service,
+    ).join(RawService, RawService.id == AddService.service).filter(
         extract('month', AddService.date_add) == num_month,
         AddService.id_employee == id_employee
     )

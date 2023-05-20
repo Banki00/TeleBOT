@@ -2,11 +2,11 @@ import logging
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from config import *
+#from config import *
 
 logger = logging.getLogger('logger')
 
-# Эта часть кода для PostgreSQL
+"""Эта часть кода для PostgreSQL"""
 # DATABASE = {
 #     'drivername': 'mysql+mysqlconnector',
 #     'host': f'{HOST}',
